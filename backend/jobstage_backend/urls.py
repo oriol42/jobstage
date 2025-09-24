@@ -19,8 +19,22 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
+from django.http import JsonResponse
+
+def home(request):
+    return JsonResponse({
+        'message': 'Jobstage API is running!',
+        'status': 'success',
+        'endpoints': {
+            'auth': '/api/auth/',
+            'accounts': '/api/accounts/',
+            'jobs': '/api/jobs/',
+            'admin': '/admin/'
+        }
+    })
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/accounts/', include('accounts.urls')),
