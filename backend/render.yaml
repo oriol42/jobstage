@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: jobstage-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn jobstage_backend.wsgi
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: jobstage-backend.onrender.com
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: False
