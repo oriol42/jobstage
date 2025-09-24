@@ -75,7 +75,9 @@ class CandidateProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='candidate_profile')
     nui = models.CharField(max_length=20, unique=True, blank=True, null=True)
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
+    profile_photo_base64 = models.TextField(blank=True, null=True)
     cv_file = models.FileField(upload_to='cv_files/', blank=True, null=True)
+    cv_file_base64 = models.TextField(blank=True, null=True)
     job_title = models.CharField(max_length=100, blank=True, null=True)
     experience_years = models.IntegerField(default=0, blank=True, null=True)
     skills = models.TextField(blank=True, null=True)  # Comma separated skills

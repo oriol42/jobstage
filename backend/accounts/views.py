@@ -239,24 +239,18 @@ def upload_profile_photo(request):
         from .models import CandidateProfile
         profile, created = CandidateProfile.objects.get_or_create(user=request.user)
         
-        # Sauvegarder la photo
-        profile.profile_photo = photo
-        profile.save()
+        # Lire l'image et la convertir en base64
+        import base64
+        photo_data = photo.read()
+        photo_base64 = base64.b64encode(photo_data).decode('utf-8')
         
-        # Construire l'URL complète pour la production
-        photo_url = None
-        if profile.profile_photo:
-            # En production, utiliser l'URL complète
-            from django.conf import settings
-            if settings.DEBUG:
-                photo_url = profile.profile_photo.url
-            else:
-                # En production, utiliser l'URL complète
-                photo_url = f"https://jobstage.onrender.com{profile.profile_photo.url}"
+        # Sauvegarder en base64 dans un champ texte
+        profile.profile_photo_base64 = photo_base64
+        profile.save()
         
         return Response({
             'message': 'Photo de profil mise à jour avec succès',
-            'photo_url': photo_url
+            'photo_url': f"data:image/jpeg;base64,{photo_base64}"
         })
     except Exception as e:
         return Response({'message': f'Erreur: {str(e)}'}, status=400)
@@ -344,22 +338,18 @@ def upload_cv(request):
         from .models import CandidateProfile
         profile, created = CandidateProfile.objects.get_or_create(user=request.user)
         
-        # Sauvegarder le CV
-        profile.cv_file = cv_file
-        profile.save()
+        # Lire le fichier et le convertir en base64
+        import base64
+        cv_data = cv_file.read()
+        cv_base64 = base64.b64encode(cv_data).decode('utf-8')
         
-        # Construire l'URL complète pour la production
-        cv_url = None
-        if profile.cv_file:
-            from django.conf import settings
-            if settings.DEBUG:
-                cv_url = profile.cv_file.url
-            else:
-                cv_url = f"https://jobstage.onrender.com{profile.cv_file.url}"
+        # Sauvegarder en base64
+        profile.cv_file_base64 = cv_base64
+        profile.save()
         
         return Response({
             'message': 'CV mis à jour avec succès',
-            'cv_url': cv_url
+            'cv_url': f"data:application/pdf;base64,{cv_base64}"
         })
     except Exception as e:
         return Response({'message': f'Erreur: {str(e)}'}, status=400)
@@ -372,18 +362,11 @@ def get_cvs(request):
         profile, created = CandidateProfile.objects.get_or_create(user=request.user)
         
         cvs = []
-        if profile.cv_file and profile.cv_file.name:
-            # Construire l'URL complète pour la production
-            from django.conf import settings
-            if settings.DEBUG:
-                cv_url = profile.cv_file.url
-            else:
-                cv_url = f"https://jobstage.onrender.com{profile.cv_file.url}"
-            
+        if profile.cv_file_base64:
             cvs.append({
                 'id': 1,
-                'name': profile.cv_file.name,
-                'url': cv_url,
+                'name': 'CV.pdf',
+                'url': f"data:application/pdf;base64,{profile.cv_file_base64}",
                 'upload_date': profile.updated_at.isoformat() if profile.updated_at else None
             })
         
