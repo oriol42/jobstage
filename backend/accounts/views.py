@@ -232,17 +232,75 @@ def upload_profile_photo(request):
     # TODO: Implémenter l'upload de photo
     return Response({'message': 'Fonctionnalité en cours de développement'})
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_user_info(request):
-    # TODO: Implémenter la mise à jour des infos utilisateur
-    return Response({'message': 'Fonctionnalité en cours de développement'})
+    try:
+        user = request.user
+        data = request.data
+        
+        # Mettre à jour les champs fournis
+        if 'first_name' in data:
+            user.first_name = data['first_name']
+        if 'last_name' in data:
+            user.last_name = data['last_name']
+        if 'phone' in data:
+            user.phone = data['phone']
+        
+        user.save()
+        
+        return Response({
+            'message': 'Informations utilisateur mises à jour avec succès',
+            'user': UserSerializer(user).data
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_candidate_profile(request):
-    # TODO: Implémenter la mise à jour du profil candidat
-    return Response({'message': 'Fonctionnalité en cours de développement'})
+    try:
+        user = request.user
+        data = request.data
+        
+        # Créer ou récupérer le profil candidat
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=user)
+        
+        # Mettre à jour les champs fournis
+        if 'bio' in data:
+            profile.bio = data['bio']
+        if 'location' in data:
+            profile.location = data['location']
+        if 'skills' in data:
+            profile.skills = data['skills']
+        if 'job_title' in data:
+            profile.job_title = data['job_title']
+        if 'experience_years' in data:
+            profile.experience_years = data['experience_years']
+        if 'expected_salary' in data:
+            profile.expected_salary = data['expected_salary']
+        if 'contract_type' in data:
+            profile.contract_type = data['contract_type']
+        
+        profile.save()
+        
+        return Response({
+            'message': 'Profil candidat mis à jour avec succès',
+            'profile': {
+                'id': profile.id,
+                'bio': profile.bio,
+                'location': profile.location,
+                'skills': profile.skills,
+                'job_title': profile.job_title,
+                'experience_years': profile.experience_years,
+                'expected_salary': profile.expected_salary,
+                'contract_type': profile.contract_type,
+                'completion_percentage': profile.completion_percentage,
+            }
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
