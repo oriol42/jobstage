@@ -62,6 +62,26 @@ frontend/jobstageapp/.pub/
 frontend/jobstageapp/build/
 frontend/jobstageapp/.flutter-plugins
 frontend/jobstageapp/.flutter-plugins-dependencies
+frontend/jobstageapp/android/.gradle/
+frontend/jobstageapp/android/app/build/
+frontend/jobstageapp/android/build/
+frontend/jobstageapp/ios/build/
+frontend/jobstageapp/linux/build/
+frontend/jobstageapp/macos/build/
+frontend/jobstageapp/windows/build/
+frontend/jobstageapp/web/build/
+
+# Flutter build outputs
+*.apk
+*.aab
+*.ipa
+*.dmg
+*.exe
+*.msix
+*.app
+*.deb
+*.rpm
+*.snap
 
 # Test files (temporaires)
 test_*.sh
