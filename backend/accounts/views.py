@@ -229,8 +229,26 @@ def change_password(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_profile_photo(request):
-    # TODO: Implémenter l'upload de photo
-    return Response({'message': 'Fonctionnalité en cours de développement'})
+    try:
+        if 'photo' not in request.FILES:
+            return Response({'message': 'Aucune photo fournie'}, status=400)
+        
+        photo = request.FILES['photo']
+        
+        # Créer ou récupérer le profil candidat
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=request.user)
+        
+        # Sauvegarder la photo
+        profile.profile_photo = photo
+        profile.save()
+        
+        return Response({
+            'message': 'Photo de profil mise à jour avec succès',
+            'photo_url': profile.profile_photo.url if profile.profile_photo else None
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 @api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -305,14 +323,46 @@ def update_candidate_profile(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_cv(request):
-    # TODO: Implémenter l'upload de CV
-    return Response({'message': 'Fonctionnalité en cours de développement'})
+    try:
+        if 'cv' not in request.FILES:
+            return Response({'message': 'Aucun CV fourni'}, status=400)
+        
+        cv_file = request.FILES['cv']
+        
+        # Créer ou récupérer le profil candidat
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=request.user)
+        
+        # Sauvegarder le CV
+        profile.cv_file = cv_file
+        profile.save()
+        
+        return Response({
+            'message': 'CV mis à jour avec succès',
+            'cv_url': profile.cv_file.url if profile.cv_file else None
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_cvs(request):
-    # TODO: Implémenter la récupération des CVs
-    return Response({'message': 'Fonctionnalité en cours de développement'})
+    try:
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=request.user)
+        
+        cvs = []
+        if profile.cv_file and profile.cv_file.name:
+            cvs.append({
+                'id': 1,
+                'name': profile.cv_file.name,
+                'url': profile.cv_file.url,
+                'upload_date': profile.updated_at.isoformat() if profile.updated_at else None
+            })
+        
+        return Response({'cvs': cvs})
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
