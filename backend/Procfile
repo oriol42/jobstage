@@ -1,1 +1,1 @@
-web: gunicorn jobstage_backend.wsgi
+web: gunicorn jobstage_backend.wsgi:application

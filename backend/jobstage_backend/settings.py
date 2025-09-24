@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-5$dfd24w1k-vauh_*=#gw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,10.0.2.2,jobstage-backend.onrender.com').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,10.0.2.2,jobstage.onrender.com').split(',')
 
 
 # Application definition
@@ -83,19 +83,10 @@ WSGI_APPLICATION = 'jobstage_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Configuration pour PostgreSQL sur Render
-if config('DATABASE_URL', default=None):
-    DATABASES = {
-        'default': dj_database_url.parse(config('DATABASE_URL'))
-    }
-else:
-    # Configuration de développement avec SQLite
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# Configuration de la base de données
+DATABASES = {
+    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
+}
 
 
 # Password validation

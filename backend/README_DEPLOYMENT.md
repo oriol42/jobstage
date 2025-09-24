@@ -1,86 +1,69 @@
-# Guide de Déploiement Jobstage sur Render
+# Guide de Déploiement JOBSTAGE sur Render
 
-## Prérequis
-- Compte Render.com
-- Base de données PostgreSQL (fournie par Render)
+## Configuration PostgreSQL
 
-## Étapes de déploiement
+Le projet a été configuré pour utiliser PostgreSQL en production et SQLite en développement.
 
-### 1. Préparation du projet
-Le projet est déjà configuré avec :
-- ✅ `requirements.txt` - Dépendances Python
-- ✅ `Procfile` - Configuration Gunicorn
-- ✅ `render.yaml` - Configuration Render
-- ✅ `settings.py` - Configuration production
-- ✅ `whitenoise` - Servir les fichiers statiques
+### Variables d'environnement requises
 
-### 2. Déploiement sur Render
+1. **SECRET_KEY** : Clé secrète Django (générée automatiquement par Render)
+2. **DEBUG** : `False` pour la production
+3. **ALLOWED_HOSTS** : URL de votre application Render
+4. **DATABASE_URL** : URL de connexion PostgreSQL (fournie par Render)
+5. **CORS_ALLOW_ALL_ORIGINS** : `True` pour permettre les requêtes CORS
 
-1. **Connecter le repository GitHub**
-   - Aller sur [render.com](https://render.com)
-   - Créer un nouveau "Web Service"
-   - Connecter le repository GitHub
+### Déploiement sur Render
 
-2. **Configuration du service**
-   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
-   - **Start Command**: `gunicorn jobstage_backend.wsgi`
-   - **Python Version**: 3.12
+1. **Connecter le repository GitHub** à Render
+2. **Créer une base de données PostgreSQL** sur Render
+3. **Configurer les variables d'environnement** :
+   - `SECRET_KEY` : Générée automatiquement
+   - `DEBUG` : `False`
+   - `ALLOWED_HOSTS` : `votre-app.onrender.com`
+   - `DATABASE_URL` : Fournie par la base de données PostgreSQL
+   - `CORS_ALLOW_ALL_ORIGINS` : `True`
 
-3. **Variables d'environnement**
-   - `SECRET_KEY`: Générée automatiquement par Render
-   - `DEBUG`: `False`
-   - `ALLOWED_HOSTS`: `jobstage-backend.onrender.com`
-   - `CORS_ALLOW_ALL_ORIGINS`: `False`
-   - `DATABASE_URL`: Fournie automatiquement par Render
+### Commandes de build
 
-4. **Base de données PostgreSQL**
-   - Créer une base de données PostgreSQL sur Render
-   - La variable `DATABASE_URL` sera automatiquement configurée
-
-### 3. Configuration CORS pour le frontend
-
-Une fois déployé, mettre à jour l'URL de base dans l'application Flutter :
-```dart
-// Dans network_config.dart
-static const String productionBaseUrl = 'https://jobstage-backend.onrender.com/api';
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput
 ```
 
-### 4. Vérification du déploiement
+### Commande de démarrage
 
-1. **Test de l'API**
-   ```bash
-   curl https://jobstage-backend.onrender.com/api/auth/register/
-   ```
+```bash
+gunicorn jobstage_backend.wsgi:application
+```
 
-2. **Test des fichiers statiques**
-   - Vérifier que les CSS/JS se chargent correctement
+## Fichiers supprimés
 
-3. **Test de la base de données**
-   - Vérifier que les migrations ont été appliquées
-   - Tester la création d'utilisateur
+Les fichiers suivants ont été supprimés car ils n'étaient plus nécessaires :
+- Tous les fichiers de test (`test_*.py`)
+- Tous les fichiers de création de données de test (`create_*.py`)
+- Tous les fichiers de debug (`debug_*.py`)
+- Le fichier de base de données SQLite (`db.sqlite3`)
 
-### 5. Monitoring
-
-- Logs disponibles dans le dashboard Render
-- Métriques de performance
-- Gestion des erreurs
-
-## Structure des fichiers
+## Structure finale
 
 ```
 backend/
-├── Procfile                 # Configuration Gunicorn
-├── requirements.txt         # Dépendances Python
-├── render.yaml             # Configuration Render
-├── .env                    # Variables d'environnement locales
-├── staticfiles/            # Fichiers statiques collectés
-└── jobstage_backend/
-    └── settings.py         # Configuration Django
+├── accounts/
+├── applications/
+├── jobs/
+├── jobstage_backend/
+├── media/
+├── requirements.txt
+├── Procfile
+├── render.yaml
+├── deploy.sh
+└── env.example
 ```
 
 ## Notes importantes
 
-- Le service gratuit de Render peut "s'endormir" après 15 minutes d'inactivité
-- Pour un usage en production, considérer un plan payant
+- La base de données sera recréée lors du déploiement
 - Les fichiers statiques sont servis par WhiteNoise
-- La base de données PostgreSQL est persistante même en plan gratuit
+- La configuration de sécurité est activée en production
+- CORS est configuré pour permettre les requêtes depuis l'application Flutter
