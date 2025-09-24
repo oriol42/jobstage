@@ -20,7 +20,7 @@ urlpatterns = [
     path('profile/cvs/<int:cv_id>/', views.delete_cv, name='delete_cv'),
     
     # Préférences d'emploi
-    path('profile/update-candidate/', views.update_candidate_profile, name='update_candidate_profile'),
+    path('profile/job-preferences/', views.update_job_preferences, name='update_job_preferences'),
     
     # Candidats
     path('candidats/', views.get_candidats, name='get_candidats'),

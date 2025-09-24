@@ -208,8 +208,8 @@ def user_profile(request):
                 'bio': profile.bio,
                 'location': profile.location,
                 'skills': profile.skills,
-                'cv_file': profile.cv_file.url if profile.cv_file and profile.cv_file.name else None,
-                'profile_photo': profile.profile_photo.url if profile.profile_photo and profile.profile_photo.name else None,
+                'cv_file': f"data:application/pdf;base64,{profile.cv_file_base64}" if profile.cv_file_base64 else None,
+                'profile_photo': f"data:image/jpeg;base64,{profile.profile_photo_base64}" if profile.profile_photo_base64 else None,
                 'completion_percentage': profile.completion_percentage,
             }
         except CandidateProfile.DoesNotExist:
@@ -379,6 +379,49 @@ def get_cvs(request):
 def delete_cv(request, cv_id):
     # TODO: Implémenter la suppression de CV
     return Response({'message': 'Fonctionnalité en cours de développement'})
+
+@api_view(['POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+def update_job_preferences(request):
+    try:
+        user = request.user
+        data = request.data
+
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=user)
+
+        # Mettre à jour les préférences d'emploi
+        if 'preferred_job_type' in data:
+            profile.preferred_job_type = data['preferred_job_type']
+        if 'experience_level' in data:
+            profile.experience_level = data['experience_level']
+        if 'salary_range_min' in data:
+            profile.salary_range_min = data['salary_range_min']
+        if 'salary_range_max' in data:
+            profile.salary_range_max = data['salary_range_max']
+        if 'preferred_work_location' in data:
+            profile.preferred_work_location = data['preferred_work_location']
+        if 'remote_work' in data:
+            profile.remote_work = data['remote_work']
+        if 'preferred_industries' in data:
+            profile.preferred_industries = data['preferred_industries']
+
+        profile.save()
+
+        return Response({
+            'message': 'Préférences d\'emploi mises à jour avec succès',
+            'preferences': {
+                'preferred_job_type': profile.preferred_job_type,
+                'experience_level': profile.experience_level,
+                'salary_range_min': profile.salary_range_min,
+                'salary_range_max': profile.salary_range_max,
+                'preferred_work_location': profile.preferred_work_location,
+                'remote_work': profile.remote_work,
+                'preferred_industries': profile.preferred_industries,
+            }
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 
 # Vue pour lister les entreprises
