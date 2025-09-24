@@ -370,6 +370,47 @@ def delete_cv(request, cv_id):
     # TODO: Implémenter la suppression de CV
     return Response({'message': 'Fonctionnalité en cours de développement'})
 
+@api_view(['POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+def update_job_preferences(request):
+    try:
+        user = request.user
+        data = request.data
+
+        # Créer ou récupérer le profil candidat
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=user)
+
+        # Mettre à jour les préférences d'emploi
+        if 'job_title' in data:
+            profile.job_title = data['job_title']
+        if 'experience_years' in data:
+            profile.experience_years = data['experience_years']
+        if 'expected_salary' in data:
+            profile.expected_salary = data['expected_salary']
+        if 'contract_type' in data:
+            profile.contract_type = data['contract_type']
+        if 'location' in data:
+            profile.location = data['location']
+        if 'skills' in data:
+            profile.skills = data['skills']
+
+        profile.save()
+
+        return Response({
+            'message': 'Préférences d\'emploi mises à jour avec succès',
+            'preferences': {
+                'job_title': profile.job_title,
+                'experience_years': profile.experience_years,
+                'expected_salary': profile.expected_salary,
+                'contract_type': profile.contract_type,
+                'location': profile.location,
+                'skills': profile.skills,
+            }
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
+
 # Vue pour lister les entreprises
 class EntrepriseListView(generics.ListAPIView):
     """Liste toutes les entreprises"""

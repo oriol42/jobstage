@@ -62,6 +62,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Configuration WhiteNoise pour servir les fichiers média
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+
 ROOT_URLCONF = 'jobstage_backend.urls'
 
 TEMPLATES = [
