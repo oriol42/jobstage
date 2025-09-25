@@ -363,9 +363,17 @@ def get_cvs(request):
         
         cvs = []
         if profile.cv_file_base64:
+            # Utiliser le nom du fichier original ou un nom par défaut
+            cv_name = 'CV.pdf'
+            if profile.cv_file and profile.cv_file.name:
+                cv_name = profile.cv_file.name.split('/')[-1]  # Prendre juste le nom du fichier
+            elif profile.cv_file_base64:
+                # Si on a des données base64 mais pas de nom de fichier, utiliser un nom générique
+                cv_name = f'CV_{profile.user.username}.pdf'
+            
             cvs.append({
                 'id': 1,
-                'name': 'CV.pdf',
+                'name': cv_name,
                 'url': f"data:application/pdf;base64,{profile.cv_file_base64}",
                 'upload_date': profile.updated_at.isoformat() if profile.updated_at else None
             })
