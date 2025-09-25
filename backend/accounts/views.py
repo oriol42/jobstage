@@ -343,8 +343,9 @@ def upload_cv(request):
         cv_data = cv_file.read()
         cv_base64 = base64.b64encode(cv_data).decode('utf-8')
         
-        # Sauvegarder en base64
+        # Sauvegarder en base64 et le nom du fichier
         profile.cv_file_base64 = cv_base64
+        profile.cv_file = cv_file  # Sauvegarder aussi le fichier pour récupérer le nom
         profile.save()
         
         return Response({
@@ -364,12 +365,12 @@ def get_cvs(request):
         cvs = []
         if profile.cv_file_base64:
             # Utiliser le nom du fichier original ou un nom par défaut
-            cv_name = 'CV.pdf'
+            cv_name = f'CV_{profile.user.username}.pdf'
             if profile.cv_file and profile.cv_file.name:
-                cv_name = profile.cv_file.name.split('/')[-1]  # Prendre juste le nom du fichier
-            elif profile.cv_file_base64:
-                # Si on a des données base64 mais pas de nom de fichier, utiliser un nom générique
-                cv_name = f'CV_{profile.user.username}.pdf'
+                # Prendre juste le nom du fichier sans le chemin
+                original_name = profile.cv_file.name.split('/')[-1]
+                if original_name and original_name != 'cv_files/':
+                    cv_name = original_name
             
             cvs.append({
                 'id': 1,
@@ -431,6 +432,58 @@ def update_job_preferences(request):
     except Exception as e:
         return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
+@api_view(['POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+def update_job_preferences(request):
+    try:
+        user = request.user
+        data = request.data
+        
+        print(f"🔧 Mise à jour des préférences pour {user.username}")
+        print(f"📊 Données reçues: {data}")
+
+        from .models import CandidateProfile
+        profile, created = CandidateProfile.objects.get_or_create(user=user)
+
+        if 'preferred_job_type' in data:
+            profile.preferred_job_type = data['preferred_job_type']
+            print(f"✅ preferred_job_type: {data['preferred_job_type']}")
+        if 'experience_level' in data:
+            profile.experience_level = data['experience_level']
+            print(f"✅ experience_level: {data['experience_level']}")
+        if 'salary_range_min' in data:
+            profile.salary_range_min = data['salary_range_min']
+            print(f"✅ salary_range_min: {data['salary_range_min']}")
+        if 'salary_range_max' in data:
+            profile.salary_range_max = data['salary_range_max']
+            print(f"✅ salary_range_max: {data['salary_range_max']}")
+        if 'preferred_work_location' in data:
+            profile.preferred_work_location = data['preferred_work_location']
+            print(f"✅ preferred_work_location: {data['preferred_work_location']}")
+        if 'remote_work' in data:
+            profile.remote_work = data['remote_work']
+            print(f"✅ remote_work: {data['remote_work']}")
+        if 'preferred_industries' in data:
+            profile.preferred_industries = data['preferred_industries']
+            print(f"✅ preferred_industries: {data['preferred_industries']}")
+
+        profile.save()
+        print(f"💾 Profil sauvegardé avec succès")
+
+        return Response({
+            'message': 'Préférences d\'emploi mises à jour avec succès',
+            'preferences': {
+                'preferred_job_type': profile.preferred_job_type,
+                'experience_level': profile.experience_level,
+                'salary_range_min': profile.salary_range_min,
+                'salary_range_max': profile.salary_range_max,
+                'preferred_work_location': profile.preferred_work_location,
+                'remote_work': profile.remote_work,
+                'preferred_industries': profile.preferred_industries,
+            }
+        })
+    except Exception as e:
+        return Response({'message': f'Erreur: {str(e)}'}, status=400)
 
 # Vue pour lister les entreprises
 class EntrepriseListView(generics.ListAPIView):
