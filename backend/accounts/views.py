@@ -211,9 +211,23 @@ def user_profile(request):
                 'cv_file': f"data:application/pdf;base64,{profile.cv_file_base64}" if profile.cv_file_base64 else None,
                 'profile_photo': f"data:image/jpeg;base64,{profile.profile_photo_base64}" if profile.profile_photo_base64 else None,
                 'completion_percentage': profile.completion_percentage,
+                # Préférences d'emploi
+                'preferred_job_type': profile.preferred_job_type,
+                'experience_level': profile.experience_level,
+                'salary_range_min': profile.salary_range_min,
+                'salary_range_max': profile.salary_range_max,
+                'preferred_work_location': profile.preferred_work_location,
+                'remote_work': profile.remote_work,
+                'preferred_industries': profile.preferred_industries,
             }
         except CandidateProfile.DoesNotExist:
             pass
+    
+    print(f"🔍 Profil retourné pour {request.user.username}:")
+    print(f"  - preferred_job_type: {profile_data.get('preferred_job_type') if profile_data else 'None'}")
+    print(f"  - experience_level: {profile_data.get('experience_level') if profile_data else 'None'}")
+    print(f"  - preferred_work_location: {profile_data.get('preferred_work_location') if profile_data else 'None'}")
+    print(f"  - remote_work: {profile_data.get('remote_work') if profile_data else 'None'}")
     
     return Response({
         'user': user_data,
